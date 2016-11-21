@@ -1,6 +1,6 @@
 {
   "name": "minicap",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "A minicap driver for Node.",
   "keywords": [
     "minicap"
