@@ -1,0 +1,30 @@
+{
+  "name": "minicap",
+  "version": "1.0.0",
+  "description": "A minicap driver for Node.",
+  "keywords": [
+    "minicap"
+  ],
+  "bugs": {
+    "url": "https://github.com/openstf/node-minicap/issues"
+  },
+  "license": "Apache-2.0",
+  "author": {
+    "name": "The OpenSTF Project",
+    "email": "contact@openstf.io",
+    "url": "https://openstf.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/openstf/node-minicap.git"
+  },
+  "devDependencies": {
+    "eslint": "^3.10.2",
+    "eslint-config-standard": "^6.2.1",
+    "eslint-plugin-promise": "^3.4.0",
+    "eslint-plugin-standard": "^2.0.1"
+  },
+  "scripts": {
+    "test": "node test"
+  }
+}
