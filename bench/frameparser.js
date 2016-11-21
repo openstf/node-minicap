@@ -5,7 +5,7 @@ const {Frame, FrameParser} = require('../')
 const KB = 1024
 const MB = KB * 1024
 
-function produceFakeFrameChunks (frameCount) {
+function produceFakeFrameChunks (frameCount, chunkSize) {
   const chunks = []
   let totalSize = 0
 
@@ -14,7 +14,7 @@ function produceFakeFrameChunks (frameCount) {
   const generateFrame = (size, fill) => {
     const idealChunk = new Frame(Buffer.alloc(size, fill)).toProtocol()
     for (let i = 0; i < idealChunk.length;) {
-      const usualChunk = idealChunk.slice(i, i + 1440)
+      const usualChunk = idealChunk.slice(i, i + chunkSize)
       chunks.push(usualChunk)
       i += usualChunk.length
     }
@@ -52,10 +52,11 @@ function parse (chunks) {
   return count
 }
 
-const wantedFrameCount = 1000
+const wantedFrameCount = process.env.FRAMES || 1000
+const chunkSize = process.env.CHUNKSIZE || 1440
 
 console.error(`Allocating ${wantedFrameCount} fake frames...`)
-const {chunks, totalSize} = produceFakeFrameChunks(wantedFrameCount)
+const {chunks, totalSize} = produceFakeFrameChunks(wantedFrameCount, chunkSize)
 
 console.error(`Allocated ${chunks.length} chunks totaling ${totalSize / MB}MB`)
 console.error('Parsing chunks...')
