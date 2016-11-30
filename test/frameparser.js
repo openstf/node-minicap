@@ -10,7 +10,7 @@ const FrameParser = require('../lib/frameparser')
 
 function shouldParseValidFrameFromIdealChunk () {
   const parser = new FrameParser()
-  const expected = new Frame(Buffer.alloc(100).fill(0xFF))
+  const expected = new Frame(0, Buffer.alloc(100).fill(0xFF))
   const result = parser.parse(expected.toProtocol())
   assert.equal(result.state, COMPLETE)
   assert.deepEqual(result.take(), expected)
@@ -19,7 +19,7 @@ function shouldParseValidFrameFromIdealChunk () {
 
 function shouldParseValidFrameFromMultipleChunks () {
   const parser = new FrameParser()
-  const expected = new Frame(Buffer.alloc(100).fill(0xFF))
+  const expected = new Frame(0, Buffer.alloc(100).fill(0xFF))
   const chunk = Buffer.concat([expected.toProtocol(), Buffer.alloc(40)])
 
   const result1 = parser.parse(chunk.slice(0, 10))
@@ -46,9 +46,9 @@ function shouldParseValidFrameFromMultipleChunks () {
 function shouldParseMultipleFramesFromChunk () {
   const parser = new FrameParser()
 
-  const expected1 = new Frame(Buffer.alloc(100).fill(0x01))
-  const expected2 = new Frame(Buffer.alloc(5).fill(0x02))
-  const expected3 = new Frame(Buffer.alloc(18).fill(0x03))
+  const expected1 = new Frame(0, Buffer.alloc(100).fill(0x01))
+  const expected2 = new Frame(1, Buffer.alloc(5).fill(0x02))
+  const expected3 = new Frame(2, Buffer.alloc(18).fill(0x03))
 
   const chunk = Buffer.concat([
     expected1.toProtocol(),

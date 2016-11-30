@@ -1,6 +1,8 @@
 const term = require('terminal-kit').terminal
 
 const Sampler = require('../lib/sampler')
+const Frame = require('../lib/frame')
+const Transmitter = require('../lib/transmitter')
 
 const KB = 1024
 
@@ -8,7 +10,8 @@ const kInterval = Symbol('interval')
 const kTimer = Symbol('timer')
 const kOnFrameRendered = Symbol('onFrameRendered')
 const kOnFrameProduced = Symbol('onFrameProduced')
-const kProducedFrameId = Symbol('producedFrameId')
+const kProducedFrameId = Symbol('producedFrame')
+const kProducedFrame = Symbol('producedFrameId')
 const kRenderedFrameId = Symbol('renderedFrameId')
 const kBytesPerSecond = Symbol('bytesPerSecond')
 const kQueue = Symbol('queue')
@@ -20,6 +23,7 @@ class FrameProducingServer {
     this[kInterval] = interval
     this[kTimer] = null
     this[kOnFrameProduced] = onFrameProduced
+    this[kProducedFrame] = null
     this[kProducedFrameId] = 0
     this[kRenderedFrameId] = 0
     this[kProducedFrameSampler] = new Sampler(60)
@@ -32,10 +36,11 @@ class FrameProducingServer {
   }
 
   produceFrame () {
-    const frameId = this[kProducedFrameId] + 1
-    this[kProducedFrameId] = frameId
+    const frame = new Frame(this[kProducedFrameId] + 1, null)
+    this[kProducedFrame] = frame
+    this[kProducedFrameId] = frame.id
     this[kProducedFrameSampler].push(1)
-    this[kOnFrameProduced](frameId)
+    this[kOnFrameProduced](frame)
   }
 
   start () {
@@ -52,8 +57,8 @@ class FrameRenderingClient {
     this[kOnFrameRendered] = onFrameRendered
   }
 
-  onReceivedFrameFromServer (frameId) {
-    this[kOnFrameRendered](frameId)
+  onReceivedFrameFromServer (frame) {
+    this[kOnFrameRendered](frame)
   }
 }
 
@@ -107,7 +112,9 @@ function report () {
   term.moveTo(1, 4)
   term.cyan(server[kRenderedFrameId])(' latest rendered frame')
   term.moveTo(1, 5)
-  term.red(server[kProducedFrameId] - server[kRenderedFrameId])(' frames behind')
+  term.red(transmitter.howMuchBehind())(' frames behind')
+  term.moveTo(1, 6)
+  term.red(transmitter.shouldThrottleMore() ? 'YES' : 'NO')(' should throttle more')
   term.hideCursor()
 }
 
@@ -115,18 +122,24 @@ const upstream = new LimitedBandwidthNetwork(200 * KB)
 const downstream = new LimitedBandwidthNetwork(200 * KB)
 
 const client = new FrameRenderingClient({
-  onFrameRendered: (frameId) => {
+  onFrameRendered: (frame) => {
     upstream.send(0.1 * KB, () => {
-      server.onClientReportedFrameRendered(frameId)
+      transmitter.markReceived(frame.id)
     })
   }
 })
 
 const server = new FrameProducingServer({
   interval: 16,
-  onFrameProduced: (frameId) => {
+  onFrameProduced: (frame) => {
+    transmitter.push(frame)
+  }
+})
+
+const transmitter = new Transmitter({
+  onFrameReady: (frame) => {
     downstream.send(20 * KB, () => {
-      client.onReceivedFrameFromServer(frameId)
+      client.onReceivedFrameFromServer(frame)
     })
   }
 })

@@ -11,8 +11,8 @@ function produceFakeFrameChunks (frameCount, chunkSize) {
 
   assert.equal(frameCount % 5, 0, 'Frame count must be divisible by 5')
 
-  const generateFrame = (size, fill) => {
-    const idealChunk = new Frame(Buffer.alloc(size, fill)).toProtocol()
+  const generateFrame = (id, size, fill) => {
+    const idealChunk = new Frame(id, Buffer.alloc(size, fill)).toProtocol()
     for (let i = 0; i < idealChunk.length;) {
       const usualChunk = idealChunk.slice(i, i + chunkSize)
       chunks.push(usualChunk)
@@ -22,11 +22,11 @@ function produceFakeFrameChunks (frameCount, chunkSize) {
   }
 
   for (let i = 0, l = frameCount / 5; i < l; ++i) {
-    generateFrame(501 * KB, 0x01)
-    generateFrame(485 * KB, 0x02)
-    generateFrame(522 * KB, 0x03)
-    generateFrame(686 * KB, 0x04)
-    generateFrame(168 * KB, 0x05)
+    generateFrame(i * 5 + 1, 501 * KB, 0x01)
+    generateFrame(i * 5 + 2, 485 * KB, 0x02)
+    generateFrame(i * 5 + 3, 522 * KB, 0x03)
+    generateFrame(i * 5 + 4, 686 * KB, 0x04)
+    generateFrame(i * 5 + 5, 168 * KB, 0x05)
   }
 
   return {
