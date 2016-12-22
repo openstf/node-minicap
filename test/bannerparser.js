@@ -1,10 +1,5 @@
 const assert = require('assert')
 
-const {
-  INCOMPLETE,
-  COMPLETE
-} = require('../lib/parse')
-
 const Banner = require('../lib/banner')
 const BannerParser = require('../lib/bannerparser')
 
@@ -22,7 +17,7 @@ function shouldParseValidBannerFromIdealChunk () {
     quirks: 1 | 4
   })
   const result = parser.parse(expected.toProtocol())
-  assert.equal(result.state, COMPLETE)
+  assert.equal(result.state, BannerParser.COMPLETE)
   assert.deepEqual(result.take(), expected)
   assert.equal(result.rest.length, 0)
 }
@@ -47,17 +42,17 @@ function shouldParseValidBannerFromMultipleChunks () {
   const chunk = Buffer.concat([expected.toProtocol(), Buffer.alloc(4)])
 
   const result1 = parser.parse(chunk.slice(0, 10))
-  assert.equal(result1.state, INCOMPLETE)
+  assert.equal(result1.state, BannerParser.INCOMPLETE)
   assert.equal(result1.take(), null)
   assert.equal(result1.rest.length, 0)
 
   const result2 = parser.parse(chunk.slice(10, 20))
-  assert.equal(result2.state, INCOMPLETE)
+  assert.equal(result2.state, BannerParser.INCOMPLETE)
   assert.equal(result2.take(), null)
   assert.equal(result2.rest.length, 0)
 
   const result3 = parser.parse(chunk.slice(20))
-  assert.equal(result3.state, COMPLETE)
+  assert.equal(result3.state, BannerParser.COMPLETE)
   assert.deepEqual(result3.take(), expected)
   assert.equal(result3.rest.length, 4)
 }
