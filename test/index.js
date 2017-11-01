@@ -1,3 +1,3 @@
 require('./bannerparser')
-require('./frameparser')
+require('./packetparser')
 require('./sampler')
